@@ -12,7 +12,6 @@ class Level
 
 	draw(DrawingCanvas drawingCanvas)
 	{
-		print("Drawing level!");
 		drawingCanvas.draw(_c, 0,0);
 	}
 }

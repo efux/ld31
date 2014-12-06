@@ -10,6 +10,9 @@ part 'ScreenCanvas.dart';
 part 'Sprite.dart';
 part 'Player.dart';
 part 'Angle.dart';
+part 'Vector.dart';
+part 'ui.dart';
+part 'Rect.dart';
 
 class Game
 {
@@ -20,6 +23,7 @@ class Game
 	bool gameFinished = false;
 	DrawingCanvas c;
 	Level lvl;
+	UI _ui;
 	Player player;
 
 	Game()
@@ -27,11 +31,22 @@ class Game
 		c = new DrawingCanvas();
 		lvl = new Level();
 		player = new Player();
+		Rect uiPos = new Rect();
+		uiPos
+			..x = _screenWidth - 20
+			..y = _screenHeight - 100
+			..width = 20
+			..height = 100;
+		_ui = new UI(player, uiPos);
 
 		_imagesToLoad = ["resources/img/map.png",
 				"resources/img/helicopter.png",
 				"resources/img/player.png"];
 		load();
+
+		// register events
+		document.onKeyDown.listen(handleInput);
+		document.onKeyUp.listen(handleInput);
 	}
 	
 	void load()
@@ -51,15 +66,52 @@ class Game
 
 	void mainLoop(double delta)
 	{
-		if(!gameFinished) {
-			c.clear();
+		if(!player.gameOver) {
 			lvl.draw(c);
+			player.update(delta);
 			player.draw(c);
-			c.draw(ResManager.get("resources/img/player.png"),100,100);
+			_ui.draw(c);
 			c.flip();
 
 			window.requestAnimationFrame(mainLoop);
+		} else {
+			showGameOver();
 		}
 	}
-	
+
+	void showGameOver()
+	{
+		c.canvas.context2D
+			..fillStyle = "#F00"
+			..fillRect(0,0, _screenWidth, _screenHeight)
+			..fillStyle = "#FFF"
+			..font = 'italic 40pt Courier'
+			..fillText("GAME OVER!", 100,100)
+			..font = '20pt Courier'
+			..fillText(player.why, 100,150);
+		c.flip();
+	}
+
+	void handleInput(KeyboardEvent event)
+	{
+		int key = event.keyCode;
+
+		switch(key) {
+			case KeyCode.Q:
+				player.rotateLeft();
+				break;
+			case KeyCode.E:
+				player.rotateRight();
+				break;
+			case KeyCode.W:
+				player.moveForward();
+				break;
+			case KeyCode.S:
+				player.moveBackward();
+				break;
+			case KeyCode.SPACE:
+				player.startLand();
+				break;
+		}
+	}
 }

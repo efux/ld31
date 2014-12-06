@@ -2,15 +2,20 @@ part of Game;
 
 class Angle
 {
-	double angle = 0.0;
+	double _angle = 0.0;
 	
 	void set(double angle)
 	{
-		this.angle = angle;
+		_angle = angle;
 	}
 
 	double getRadian()
 	{
-		return (angle * math.PI) / 180.0;
+		return (_angle * math.PI) / 180.0;
+	}
+
+	double getAngle()
+	{
+		return _angle;
 	}
 }

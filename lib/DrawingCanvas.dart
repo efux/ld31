@@ -24,7 +24,7 @@ class DrawingCanvas
 		_ctx.drawImage(img, x, y);
 	}
 
-	void drawScaled(ImageElement img, int x, int y, int dwidth, int dheight, Angle angle)
+	void drawScaled(CanvasElement img, int x, int y, int dwidth, int dheight, Angle angle)
 	{
 		_ctx.translate(x, y);
 		_ctx.translate(img.width/2, img.height/2);
