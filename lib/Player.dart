@@ -15,11 +15,14 @@ class Player
 	String why = "";
 	double _waterFilling = 0.0;
 	double _fuel = 0.0;
+	AudioBufferSourceNode _source;
+	AudioContext _audioCtx;
 	Angle angle;
 	Sprite _playerSprite;
 
-	Player()
+	Player(AudioContext audioCtx)
 	{
+		_audioCtx = audioCtx;
 		angle = new Angle();
 		angle.set(39.0);
 		_playerSprite = new Sprite(ResManager.get("resources/img/player.png"));
@@ -48,6 +51,9 @@ class Player
 			rise();
 		}
 		if(isLanding) {
+			if(_source.buffer != ResManager.getSound("resources/sounds/heli_start.wav")) {
+				_source.buffer = ResManager.getSound("resources/sounds/heli_start.wav");
+			}
 			sink();
 		}
 		if(isOverWater()) {
@@ -72,9 +78,17 @@ class Player
 		} else {
 			_leakFuel();
 			if(_actSpeed != 0) {
+				if(_source.buffer != ResManager.getSound("resources/sounds/heli.wav")) {
+					_source.buffer = ResManager.getSound("resources/sounds/heli.wav");
+				}
 				_move(_actSpeed);
+			} else {
+				if(_source.buffer != ResManager.getSound("resources/sounds/heli_start.wav")) {
+					_source.buffer = ResManager.getSound("resources/sounds/heli_start.wav");
+				}
 			}
 			if(_fuel <= 0.009) {
+				_source.buffer = ResManager.getSound("resources/sounds/heli_start.wav");
 				isStarting = false;
 				isLanding = true;
 			}
@@ -91,7 +105,7 @@ class Player
 	}
 
 	bool isOverBuilding() {
-		if(_x < 340 && _x > 290 && _y > 480) {
+		if(_x < 360 && _x > 290 && _y > 440) {
 			return true;
 		}
 		return false;
@@ -100,8 +114,16 @@ class Player
 	void startLand()
 	{
 		if(!isLanding && !isStarting) {
+			isStarting = true;
 			if(_altitude == 0.0) {
-				isStarting = true;
+				_source = _audioCtx.createBufferSource();
+				_source.buffer = ResManager.getSound("resources/sounds/heli_start.wav");
+				BiquadFilterNode filter = _audioCtx.createBiquadFilter();
+				filter.type = "lowpass";
+				_source.connectNode(filter, 0, 0);
+				filter.connectNode(_audioCtx.destination,0,0);
+				_source.start(0);
+				_source.loop = true;
 			} else {
 				isLanding = true;
 			}
@@ -153,6 +175,7 @@ class Player
 		if(_altitude <= 0.0) {
 			_altitude = 0.0;
 			isLanding = false;
+			_source.stop(4);
 		}
 	}
 

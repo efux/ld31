@@ -1,5 +1,5 @@
 #!/bin/zsh
-/tmp/dart-sdk/bin/dart2js -o LD31.dart.js LD31.dart
+~/Downloads/dart-sdk/bin/dart2js -o LD31.dart.js LD31.dart
 exit;
 
 dart2js="/tmp/dart-sdk/bin/dart2js"

@@ -2,6 +2,7 @@ library Game;
 
 import "dart:html";
 import "dart:math" as math;
+import "dart:web_audio";
 
 part 'ResManager.dart';
 part 'Level.dart';
@@ -20,6 +21,8 @@ class Game
 	final int _screenHeight = 640;
 	int _loadedImageCounter = 0;
 	List<String> _imagesToLoad;
+	List<String> _soundsToLoad;
+	AudioContext audioCtx;
 	bool gameFinished = false;
 	DrawingCanvas c;
 	Level lvl;
@@ -28,9 +31,10 @@ class Game
 
 	Game()
 	{
+		audioCtx = new AudioContext();
 		c = new DrawingCanvas();
 		lvl = new Level();
-		player = new Player();
+		player = new Player(audioCtx);
 		Rect uiPos = new Rect();
 		uiPos
 			..x = _screenWidth - 20
@@ -42,6 +46,8 @@ class Game
 		_imagesToLoad = ["resources/img/map.png",
 				"resources/img/helicopter.png",
 				"resources/img/player.png"];
+		_soundsToLoad = ["resources/sounds/heli_start.wav",
+				"resources/sounds/heli.wav"];
 		load();
 
 		// register events
@@ -53,6 +59,9 @@ class Game
 	{
 		for(String url in _imagesToLoad) {
 			ResManager.load(url, loadedImageCallback);
+		}
+		for(String url in _soundsToLoad) {
+			ResManager.loadSound(url, audioCtx);
 		}
 	}
 
