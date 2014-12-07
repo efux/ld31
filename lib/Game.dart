@@ -226,7 +226,7 @@ class Game
 						window.requestAnimationFrame(mainLoop);
 					}
 					break;
-				case KeyCode.SPACE:
+				case KeyCode.E:
 					player.startLand();
 					break;
 			}
