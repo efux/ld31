@@ -6,6 +6,7 @@ class Fire implements Comparable
 	Sprite _sprite;
 	Vector _position;
 	int _spawned = 0;
+	double lastUpdated;
 
 	Fire(Vector position, Function callback)
 	{
@@ -23,26 +24,33 @@ class Fire implements Comparable
 
 	void update(double delta)
 	{
-		_sprite.step();
-		if(_spawned < 4) {
-			if(new math.Random().nextInt(500)<=(BurnableZone.firesExtinguished/20+1)) {
-				Vector newFirePos = new Vector(0,0);
-				_spawned++;
-				switch(new math.Random().nextInt(4)) {
-					case 0:
-						newFirePos.x += 32;
-						break;
-					case 1:
-						newFirePos.x -= 32;
-						break;
-					case 2:
-						newFirePos.y += 32;
-						break;
-					case 3:
-						newFirePos.y -= 32;
-						break;
+		if(lastUpdated==null) {
+			lastUpdated = delta;
+		} else {
+			if(delta-lastUpdated > 100) {
+				lastUpdated = delta;
+				_sprite.step();
+				if(_spawned < 4) {
+					if(new math.Random().nextInt(50)<=(BurnableZone.firesExtinguished/20+1)) {
+						Vector newFirePos = new Vector(0,0);
+						_spawned++;
+						switch(new math.Random().nextInt(4)) {
+							case 0:
+								newFirePos.x += 32;
+								break;
+							case 1:
+								newFirePos.x -= 32;
+								break;
+							case 2:
+								newFirePos.y += 32;
+								break;
+							case 3:
+								newFirePos.y -= 32;
+								break;
+						}
+						_callback(_position + newFirePos);
+					}
 				}
-				_callback(_position + newFirePos);
 			}
 		}
 	}

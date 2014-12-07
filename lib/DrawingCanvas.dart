@@ -9,7 +9,7 @@ class DrawingCanvas
 	DrawingCanvas()
 	{
 		canvas = new Element.tag("canvas");
-		canvas.width = 1024;
+		canvas.width = 945;
 		canvas.height = 640;
 		_ctx = canvas.context2D;
 	}

@@ -5,9 +5,9 @@ class Player
 	double _altitude = 0.0;
 	double _maxAltitude = 50.0;
 	int _actSpeed = 0;
-	int _maxSpeed = 5;
-	int _x = 320;
-	int _y = 505;
+	int _maxSpeed = 10;
+	double _x = 320.0;
+	double _y = 505.0;
 	double rotation_actSpeed = 5.0;
 	bool isLanding = false;
 	bool isStarting = false;
@@ -15,6 +15,7 @@ class Player
 	bool _looseWater = false;
 	String why = "";
 	double _waterFilling = 0.0;
+	double lastUpdated;
 	double _fuel = 0.0;
 	AudioBufferSourceNode _source;
 	AudioContext _audioCtx;
@@ -43,7 +44,7 @@ class Player
 	{
 		double zoom = -1 * (_maxAltitude - _altitude);
 		_playerSprite.setZoom(zoom);
-		_playerSprite.draw(c, _x, _y, angle);
+		_playerSprite.draw(c, _x.round(), _y.round(), angle);
 	}
 
 	Vector getHelicopterPos()
@@ -52,7 +53,7 @@ class Player
 		heliPos = heliPos - (new Vector(80, 80));
 		heliPos.rotate(angle);
 		heliPos = heliPos + (new Vector(80, 80));
-		heliPos = heliPos + (new Vector(_x,_y));
+		heliPos = heliPos + (new Vector(_x.round(),_y.round()));
 		return heliPos;
 	}
 
@@ -63,66 +64,87 @@ class Player
 
 	void update(double delta)
 	{
-		if(isStarting) {
-			rise();
-		}
-		if(isLanding) {
-			if(_source.buffer != ResManager.getSound("resources/sounds/heli_start.wav")) {
-				_source.buffer = ResManager.getSound("resources/sounds/heli_start.wav");
-			}
-			sink();
-		}
-		if(isOverWater()) {
-			_fillWater();
-		}
-		if(_looseWater) {
-			_waterFilling = _waterFilling - 2.0;
-			if(_waterFilling <= 0.0) {
-				_waterFilling = 0.0;
-				_looseWater = false;
-			}
-		}
-		_playerSprite.step();
-		if(_altitude == 0.0) {
-			_actSpeed = 0;
-			_playerSprite.runAnimation(false);
-			if(isStarting) {
-				rise();
-			}
-			if(!isOverBuilding()) {
-				gameOver = true;
-				if(_fuel == 0.0) {
-					why = "You ran out of fuel! You crashed!";
-				} else {
-					why = "You crashed!";
-				}
-			} else {
-				_fillFuel();
-			}
+		if(lastUpdated == null) {
+			lastUpdated = delta;
 		} else {
-			_leakFuel();
-			if(_actSpeed != 0) {
-				if(_source.buffer != ResManager.getSound("resources/sounds/heli.wav")) {
-					_source.buffer = ResManager.getSound("resources/sounds/heli.wav");
+			if(delta - lastUpdated > 20) {
+				checkFuel();
+				lastUpdated = delta;
+				if(isStarting) {
+					rise();
 				}
-				_move(_actSpeed);
-			} else {
-				if(_source.buffer != ResManager.getSound("resources/sounds/heli_start.wav")) {
-					_source.buffer = ResManager.getSound("resources/sounds/heli_start.wav");
+				if(isLanding) {
+					if(_source.buffer != ResManager.getSound("resources/sounds/heli_start.wav")) {
+						_source.buffer = ResManager.getSound("resources/sounds/heli_start.wav");
+					}
+					sink();
 				}
-			}
-			if(_fuel <= 0.009) {
-				_source.buffer = ResManager.getSound("resources/sounds/heli_start.wav");
-				isStarting = false;
-				isLanding = true;
-			}
+				if(isOverWater()) {
+					_fillWater();
+				}
+				if(_looseWater) {
+					_waterFilling = _waterFilling - 2.0;
+					if(_waterFilling <= 0.0) {
+						_waterFilling = 0.0;
+						_looseWater = false;
+					}
+				}
+				_playerSprite.step();
+				if(_altitude == 0.0) {
+					_actSpeed = 0;
+					_playerSprite.runAnimation(false);
+					if(isStarting) {
+						rise();
+					}
+					if(!isOverBuilding()) {
+						gameOver = true;
+						if(_fuel == 0.0) {
+							why = "You ran out of fuel! You crashed!";
+						} else {
+							why = "You crashed!";
+						}
+					} else {
+						_fillFuel();
+					}
+				} else {
+					_leakFuel();
+					if(_actSpeed != 0) {
+						if(_source.buffer != ResManager.getSound("resources/sounds/heli.wav")) {
+							_source.buffer = ResManager.getSound("resources/sounds/heli.wav");
+						}
+						_move(_actSpeed);
+					} else {
+						if(_source.buffer != ResManager.getSound("resources/sounds/heli_start.wav")) {
+							_source.buffer = ResManager.getSound("resources/sounds/heli_start.wav");
+						}
+					}
+					if(_fuel <= 0.009) {
+						_source.buffer = ResManager.getSound("resources/sounds/heli_start.wav");
+						isStarting = false;
+						isLanding = true;
+					}
 
-			_playerSprite.runAnimation(true);
+					_playerSprite.runAnimation(true);
+				}
+			}
+		}
+	}
+
+	void checkFuel()
+	{
+		if(_fuel < 6.0) {
+			AudioBufferSourceNode fuelSound = _audioCtx.createBufferSource();
+			fuelSound.buffer = ResManager.getSound("resources/sounds/fuel.wav");
+			BiquadFilterNode filter = _audioCtx.createBiquadFilter();
+			filter.type = "lowpass";
+			fuelSound.connectNode(filter, 0, 0);
+			filter.connectNode(_audioCtx.destination,0,0);
+			fuelSound.start(0);
 		}
 	}
 
 	bool isOverWater() {
-		if(_x < 200 && _y < 200) {
+		if(_x < 200.0 && _y < 200.0) {
 			return true;
 		}
 		return false;
@@ -144,7 +166,7 @@ class Player
 				_source = _audioCtx.createBufferSource();
 				_source.buffer = ResManager.getSound("resources/sounds/heli_start.wav");
 				BiquadFilterNode filter = _audioCtx.createBiquadFilter();
-				//filter.type = "lowpass";
+				filter.type = "lowpass";
 				_source.connectNode(filter, 0, 0);
 				filter.connectNode(_audioCtx.destination,0,0);
 				_source.start(0);
@@ -174,7 +196,7 @@ class Player
 
 	void _move(int _actSpeed)
 	{
-		Vector v = new Vector(_actSpeed, 0);
+		Vector2f v = new Vector2f(_actSpeed, 0.0);
 		v.rotate(angle);
 		_x += v.x;
 		_y += v.y;
@@ -183,14 +205,14 @@ class Player
 	void moveForward() 
 	{
 		if(_actSpeed <= _maxSpeed) {
-			_actSpeed++;
+			_actSpeed = _actSpeed + 2;
 		}
 	}
 
 	void moveBackward()
 	{
 		if(_actSpeed >= -1 * _maxSpeed) {
-			_actSpeed--;
+			_actSpeed = _actSpeed -2;
 		}
 	}
 

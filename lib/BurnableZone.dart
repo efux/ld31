@@ -7,6 +7,8 @@ class BurnableZone
 	int _maxFires = 0;
 	Rect _position;
 	static int firesExtinguished = 0;
+	double lastUpdated;
+	int firesSpawned = 0;
 
 	BurnableZone(Rect position)
 	{
@@ -17,15 +19,25 @@ class BurnableZone
 
 	void update(double delta)
 	{
-		if(new math.Random().nextInt(1000)<=1) {
-			Vector newFirePos = new Vector(_position.x + new math.Random().nextInt(_position.width),
-					_position.y + new math.Random().nextInt(_position.height));
-			newFirePos.x = (newFirePos.x / 32).round()*32;
-			newFirePos.y = (newFirePos.y / 32).round()*32;
-			spread(newFirePos);
-		}
-		for(int i = 0; i < _fires.length; i++) {
-			_fires[i].update(delta);
+		if(lastUpdated == null) {
+			lastUpdated = delta;
+		} else {
+			if(delta - lastUpdated > 200) {
+				lastUpdated = delta;
+				if(firesSpawned <= 3) {
+					if(new math.Random().nextInt(10)<=1) {
+						Vector newFirePos = new Vector(_position.x + new math.Random().nextInt(_position.width),
+							_position.y + new math.Random().nextInt(_position.height));
+						newFirePos.x = (newFirePos.x / 32).round()*32;
+						newFirePos.y = (newFirePos.y / 32).round()*32;
+						spread(newFirePos);
+						firesSpawned++;
+					}
+				}
+				for(int i = 0; i < _fires.length; i++) {
+					_fires[i].update(delta);
+				}
+			}
 		}
 	}
 
