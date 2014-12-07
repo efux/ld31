@@ -20,6 +20,11 @@ class Sprite
 		c.drawScaled(canvas, x, y, canvas.width + _zoom, canvas.height + _zoom, angle);
 	}
 
+	void setTileSize(int tileSize)
+	{
+		_tileSize = tileSize;
+	}
+
 	void step()
 	{
 		if(_run) {

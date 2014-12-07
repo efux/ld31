@@ -18,7 +18,7 @@ class UI
 
 	void draw(DrawingCanvas c)
 	{
-		Rect waterPos = new Rect();
+		Rect waterPos = new Rect(0,0,0,0);
 		waterPos
 			..x = 0
 			..y = 16
@@ -26,7 +26,7 @@ class UI
 			..height = _position.height - 16;
 		waterPos.y = 17 + waterPos.height - ((_player.getWaterFilling() * waterPos.height) / 100).round();
 
-		Rect fuelPos = new Rect();
+		Rect fuelPos = new Rect(0,0,0,0);
 		fuelPos
 			..x = (_position.width/2).round()
 			..y = 16

@@ -12,12 +12,16 @@ class Player
 	bool isLanding = false;
 	bool isStarting = false;
 	bool gameOver = false;
+	bool _looseWater = false;
 	String why = "";
 	double _waterFilling = 0.0;
 	double _fuel = 0.0;
 	AudioBufferSourceNode _source;
 	AudioContext _audioCtx;
-	Angle angle; Sprite _playerSprite; Player(AudioContext audioCtx)
+	Angle angle; 
+	Sprite _playerSprite; 
+	
+	Player(AudioContext audioCtx)
 	{
 		_audioCtx = audioCtx;
 		angle = new Angle();
@@ -42,6 +46,21 @@ class Player
 		_playerSprite.draw(c, _x, _y, angle);
 	}
 
+	Vector getHelicopterPos()
+	{
+		Vector heliPos = new Vector(110,-84);
+		heliPos = heliPos - (new Vector(80, 80));
+		heliPos.rotate(angle);
+		heliPos = heliPos + (new Vector(80, 80));
+		heliPos = heliPos + (new Vector(_x,_y));
+		return heliPos;
+	}
+
+	void looseWater()
+	{
+		_looseWater = true;
+	}
+
 	void update(double delta)
 	{
 		if(isStarting) {
@@ -55,6 +74,13 @@ class Player
 		}
 		if(isOverWater()) {
 			_fillWater();
+		}
+		if(_looseWater) {
+			_waterFilling = _waterFilling - 2.0;
+			if(_waterFilling <= 0.0) {
+				_waterFilling = 0.0;
+				_looseWater = false;
+			}
 		}
 		_playerSprite.step();
 		if(_altitude == 0.0) {
@@ -103,7 +129,8 @@ class Player
 	}
 
 	bool isOverBuilding() {
-		if(_x < 360 && _x > 290 && _y > 440) {
+		Vector heliPos = getHelicopterPos();
+		if(heliPos.x < 480 && heliPos.x > 300 && heliPos.y > 480) {
 			return true;
 		}
 		return false;
