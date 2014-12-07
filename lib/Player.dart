@@ -5,7 +5,7 @@ class Player
 	double _altitude = 0.0;
 	double _maxAltitude = 50.0;
 	int _actSpeed = 0;
-	int _maxSpeed = 15;
+	int _maxSpeed = 5;
 	int _x = 320;
 	int _y = 505;
 	double rotation_actSpeed = 5.0;
@@ -17,10 +17,7 @@ class Player
 	double _fuel = 0.0;
 	AudioBufferSourceNode _source;
 	AudioContext _audioCtx;
-	Angle angle;
-	Sprite _playerSprite;
-
-	Player(AudioContext audioCtx)
+	Angle angle; Sprite _playerSprite; Player(AudioContext audioCtx)
 	{
 		_audioCtx = audioCtx;
 		angle = new Angle();
@@ -69,9 +66,10 @@ class Player
 			if(!isOverBuilding()) {
 				gameOver = true;
 				if(_fuel == 0.0) {
-					why = "You ran out of fuel\r\n";
+					why = "You ran out of fuel! You crashed!";
+				} else {
+					why = "You crashed!";
 				}
-				why += "You crashed!";
 			} else {
 				_fillFuel();
 			}
@@ -119,7 +117,7 @@ class Player
 				_source = _audioCtx.createBufferSource();
 				_source.buffer = ResManager.getSound("resources/sounds/heli_start.wav");
 				BiquadFilterNode filter = _audioCtx.createBiquadFilter();
-				filter.type = "lowpass";
+				//filter.type = "lowpass";
 				_source.connectNode(filter, 0, 0);
 				filter.connectNode(_audioCtx.destination,0,0);
 				_source.start(0);
@@ -157,14 +155,14 @@ class Player
 
 	void moveForward() 
 	{
-		if(_actSpeed.abs() <= _maxSpeed) {
+		if(_actSpeed <= _maxSpeed) {
 			_actSpeed++;
 		}
 	}
 
 	void moveBackward()
 	{
-		if(_actSpeed.abs() <= _maxSpeed) {
+		if(_actSpeed >= -1 * _maxSpeed) {
 			_actSpeed--;
 		}
 	}
@@ -191,20 +189,23 @@ class Player
 	void _leakFuel()
 	{
 		if(_fuel >= 0.00) {
-			_fuel -= 0.01;
+			_fuel -= 0.02;
+		}
+		if(_fuel < 0.00) {
+			_fuel = 0.0;
 		}
 	}
 
 	void _fillWater()
 	{
-		if(_waterFilling <= 100.00) {
+		if(_waterFilling < 100.00) {
 			_waterFilling = _waterFilling + 1;
 		}
 	}
 
 	void _fillFuel()
 	{
-		if(_fuel <= 100.00) {
+		if(_fuel < 100.00) {
 			_fuel =  _fuel + 1;
 		}
 	}

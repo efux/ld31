@@ -24,7 +24,7 @@ class UI
 			..y = 16
 			..width = (_position.width/2).round()
 			..height = _position.height - 16;
-		waterPos.y = 17 + waterPos.height - (_player.getWaterFilling() * waterPos.height) / 100;
+		waterPos.y = 17 + waterPos.height - ((_player.getWaterFilling() * waterPos.height) / 100).round();
 
 		Rect fuelPos = new Rect();
 		fuelPos
@@ -32,7 +32,7 @@ class UI
 			..y = 16
 			..width = waterPos.width
 			..height = _position.height - 16;
-		fuelPos.y = 17 + fuelPos.height - (_player.getFuel() * fuelPos.height) / 100;
+		fuelPos.y = 17 + fuelPos.height - ((_player.getFuel() * fuelPos.height) / 100).round();
 
 		_ctx
 			..fillStyle = "#000"
